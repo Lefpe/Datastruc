@@ -123,6 +123,42 @@ void exibirCatalogo(struct Catalogo *catalogo) {
   }
 }
 //lista em ordem alfabetica//
+void listaAlfabetica(struct Catalogo *catalogo, int ordem) {
+    struct Livros *livro = catalogo->head;
+    if (ordem == 1) {
+        // Listar em ordem alfabética crescente (A a Z)
+        printf("-- Lista em ordem alfabética crescente --\n");
+        while (livro) {
+            printf("Nome do livro: %s\n", livro->titutlo);
+            printf("ISBN: %s\n", livro->isbn);
+            printf("Autor: %s\n", livro->autor);
+            printf("Ano de publicação: %d\n", livro->ano);
+            printf("Número de exemplares: %d\n", livro->numexemplares);
+            printf("===============================\n");
+            livro = livro->tale;
+        }
+    } else if (ordem == 2) {
+        // Listar em ordem alfabética decrescente (Z a A)
+        printf("-- Lista em ordem alfabética decrescente --\n");
+
+        // Encontre o último livro
+        while (livro->tale != NULL) {
+            livro = livro->tale;
+        }
+
+        while (livro) {
+            printf("Nome do livro: %s\n", livro->titutlo);
+            printf("ISBN: %s\n", livro->isbn);
+            printf("Autor: %s\n", livro->autor);
+            printf("Ano de publicação: %d\n", livro->ano);
+            printf("Número de exemplares: %d\n", livro->numexemplares);
+            printf("===============================\n");
+            livro = livro->head;
+        }
+    } else {
+        printf("Opção inválida para ordenação alfabética.\n");
+    }
+}
 //fim da função
 
 
@@ -135,7 +171,7 @@ int main(void) {
     int options;
     int del;
     int busca;
-
+//optei por usar um menu desta forma para que a lista ficasse em loop, pois usando somente switch, a lista fechava ao inserir um valor, não armazenando e não conseguindo acessar alguns ponteiros//
     while (1) {
       printf("\n-- Catálogo --\n");
       printf("Digite a opção que você deseja:\n");
@@ -143,7 +179,8 @@ int main(void) {
       printf("2. Deletar Livros\n");
       printf("3. Buscar Livro\n");
       printf("4. Exibir Catálogo\n");
-      printf("5. Sair\n");
+      printf ("5.ordenar lista \n");
+      printf("6. Sair\n");
 
       scanf("%d", &options);
       switch (options){
@@ -236,13 +273,31 @@ int main(void) {
           break;
 
       case 5:
-            free(catalogo);
-                exit(0);
+           printf("Lista em ordem alfabética:\n");
+        printf("1. Ordem crescente (A a Z)\n");
+        printf("2. Ordem decrescente (Z a A)\n");
+        scanf("%d", &lo);
+
+        if (lo == 1) {
+            listaAlfabetica(catalogo, 1);
+        } else if (lo == 2) {
+            listaAlfabetica(catalogo, 2);
+        } else {
+            printf("Opção inválida.\n");
+        }
+        break;
                 break;
+        case 6:
+         free(catalogo);
+                exit(0);
+        break;
 
             default:
                 printf("Opção inválida. Tente novamente.\n");
+              
                 break;
+        
+        
     }
     }
 }
