@@ -86,12 +86,13 @@ void deletarLivros(struct Catalogo *catalogo, char isbn[14], int nremover) {
     atual = atual->tale;
   }
 
-  printf("Livro com ISBN %s não encontrado!", isbn);
+
 }
 
 // buscar livros//
 void buscarLivros(struct Catalogo *catalogo, char isbn[14]) {
   struct Livros *aux = catalogo->head;
+  //usado uma função auxiliar//
 
   while (aux != NULL) {
     if (strcmp(aux->isbn, isbn) == 0) {
