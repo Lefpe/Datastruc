@@ -419,3 +419,5 @@ int main(void) {
     }
     }
 }
+// acho que tem algum bug em informar por ano, provavelmente por parametros de
+// chaves, já que fiquei tão focado na lógica e não vi estes detalhes//
