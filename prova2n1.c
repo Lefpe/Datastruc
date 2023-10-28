@@ -206,7 +206,7 @@ int main(void) {
   catalogo = (struct Catalogo *)malloc(sizeof(struct Catalogo));
   catalogo->head = NULL;
   catalogo->tail = NULL;
-
+// estas variaveis eu havia esqueceido de passar para o github//
   int options;
   int del;
   int busca;
@@ -292,7 +292,7 @@ int main(void) {
           scanf(" %[^\n]", autor_search);
           printf("Deseja buscar após determinado ano? (1 - Sim / 2 - Não): ");
           scanf("%d", &buscaporano);
-
+          // ao buscar por autor, a forma de buscar por ano está como opção//
           if (buscaporano == 1) {
             int lo;
             printf("Digite o ano inicial de publicação dos livros a serem pesquisados: ");
