@@ -1,0 +1,301 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Pessoa {
+    char nome[30];
+    char cpf[12];
+    char sexo;
+    int idade;
+} Pessoa;
+
+typedef struct Node {
+    Pessoa *pessoa;
+    struct Node *filhos[10];
+} Node;
+
+Node *cadastrarPessoa(char nome[30], char cpf[12], char sexo, int idade) {
+    Node *newPessoa = (Node*)malloc(sizeof(Node));
+    newPessoa->pessoa = (Pessoa*)malloc(sizeof(Pessoa));
+    strcpy(newPessoa->pessoa->nome, nome);
+    strcpy(newPessoa->pessoa->cpf, cpf);
+    newPessoa->pessoa->sexo = sexo;
+    newPessoa->pessoa->idade = idade;
+    for (int i = 0; i < 10; i++) {
+        newPessoa->filhos[i] = NULL;
+    }
+    return newPessoa;
+}
+
+// Função para contar os homens cadastrados 
+int contarHomens(Node *raiz) {
+    if(raiz == NULL) {
+        return 0;
+    }
+
+    int contagem = 0;
+
+    if(raiz->pessoa->sexo == 'M') {
+        contagem = 1;
+    }  
+
+    for (int i = 0; i < 10 && raiz->filhos[i] != NULL; i++) {
+        contagem += contarHomens(raiz->filhos[i]);
+    }
+
+    return contagem;
+}
+
+// Função que conta os tios 
+void contarTios(Node *raiz, char nome, int *tioHomem, int *tiaMulher) {
+    if(raiz == NULL) {
+        return;
+    }
+
+    for(int i = 0; i < 10 && raiz->filhos[i] != NULL; i++) {
+        Node *filhoAtual = raiz->filhos[i];
+
+        if(strcmp(filhoAtual->pessoa->nome, &nome) != 0) {
+            *tioHomem += contarHomens(filhoAtual);
+        }  
+        
+        if(raiz->pessoa->sexo == 'M') {
+            *tiaMulher += 1;
+        }
+    }
+}
+
+// Função que vai mostrar as tias e os tios
+void contaTioHomemETiaMulher(Node *raiz, char *nome) {
+    int tiosMasculinos = 0;
+    int tiosFemininos = 0;
+
+    contarTios(raiz, *nome, &tiosMasculinos, &tiosFemininos);
+
+    printf("A pessoa %s tem %d tios masculinos e %d tias femininas.\n", nome, tiosMasculinos, tiosFemininos);
+}
+
+// Função que busca cpf
+Node* buscaCpf(Node *raiz, char *cpf) {
+    if(raiz == NULL) {
+        return NULL;
+    }
+
+    if(strcmp(raiz->pessoa->cpf, cpf) == 0) {
+        return raiz;
+    }
+
+    Node *resultado = NULL;
+
+    for(int i = 0; i < 10 && raiz->filhos[i] != NULL; i++) {
+        resultado = buscaCpf(raiz->filhos[i], cpf);
+
+        if(resultado != NULL) {
+            return resultado;
+        }
+    }
+
+    return resultado;
+}
+
+// Função que mostra os avôs e avós
+void informaAvos(Node *raiz, char *cpf) {
+    Node *pessoa = buscaCpf(raiz, cpf);
+
+    if(pessoa == NULL) {
+        printf("Pessoa com CPF %s nao encontrada na arvore genealogica\n", cpf);
+        return;
+    }
+
+    if (pessoa->filhos[0] == NULL) {
+        printf("Não há informações suficientes para encontrar avós da pessoa com CPF %s.\n", cpf);
+        return;
+    }
+
+    Node *pai = pessoa->filhos[0];
+
+    if (pai->filhos[0] == NULL) {
+        printf("Não há informações suficientes para encontrar avós da pessoa com CPF %s.\n", cpf);
+        return;
+    }
+
+    Node *avoPaterno = pai->filhos[0];
+    Node *avoMaterno = NULL;
+
+    if(pai->filhos[1] != NULL) {
+       avoMaterno = pai->filhos[1];
+    }
+
+    if(avoPaterno != NULL) {
+        printf("Avo Paterno: %s\n", avoPaterno->pessoa->nome);
+    } else {
+        printf("Desconhecido");
+    }
+
+    if(avoMaterno != NULL) {
+        printf("Avo Materno: %s\n", avoMaterno->pessoa->nome);
+    } else {
+        printf("Desconhecida");
+    }
+} 
+
+// Função que conta as primas
+int contarPrimas(Node *raiz, char *cpf) {
+
+    if(raiz == NULL){
+        return 0;
+    }
+
+    int contagem = 0;
+
+    for(int i = 0; i < 10 && raiz->filhos[i] != NULL; i++) {
+        Node *filhoAtual = raiz->filhos[i];
+
+        if(strcmp(filhoAtual->pessoa->cpf, cpf) != 0) {
+            if(filhoAtual->pessoa->sexo == 'F') {
+                contagem++;
+            }
+            contagem += contarPrimas(filhoAtual, cpf);
+        }
+    }
+
+    return contagem;
+}
+
+// Função que vai imprimir as pessoas com mais de duas primas
+void imprimirComMaisDeDuasPrimas(Node *raiz) {
+    if (raiz == NULL) {
+        return;
+    }
+
+    // Verificar os filhos para encontrar pessoas com mais de duas primas
+    for (int i = 0; i < 10 && raiz->filhos[i] != NULL; i++) {
+        Node *filhoAtual = raiz->filhos[i];
+
+        int primas = contarPrimas(raiz, filhoAtual->pessoa->cpf);
+
+        if (primas > 2) {
+            printf("%s tem mais de duas primas.\n", filhoAtual->pessoa->nome);
+        }
+
+        // Recursivamente verificar nas filhas do filho atual
+        imprimirComMaisDeDuasPrimas(filhoAtual);
+    }
+}
+
+char* encontrarCpfHomemMaisVelho(Node *raiz) {
+    if (raiz == NULL) {
+        return "Nenhum homem encontrado.";
+    }
+
+    char *cpfHomemMaisVelho = NULL;
+    int idadeHomemMaisVelho = -1;
+
+    // Para cada pessoa na árvore genealógica
+    for (int i = 0; i < 10 && raiz->filhos[i] != NULL; i++) {
+        Node *filhoAtual = raiz->filhos[i];
+
+        // Verificar se a pessoa é do sexo masculino e mais velha
+        if (filhoAtual->pessoa->sexo == 'M' && filhoAtual->pessoa->idade > idadeHomemMaisVelho) {
+            cpfHomemMaisVelho = filhoAtual->pessoa->cpf;
+            idadeHomemMaisVelho = filhoAtual->pessoa->idade;
+        }
+
+        // Recursivamente buscar nos filhos
+        char *cpfEncontrado = encontrarCpfHomemMaisVelho(filhoAtual);
+
+        // Se um CPF válido foi encontrado nos filhos, atualizar a informação
+        if (cpfEncontrado != NULL && strcmp(cpfEncontrado, "Nenhum homem encontrado.") != 0) {
+            cpfHomemMaisVelho = cpfEncontrado;
+        }
+    }
+
+    return (cpfHomemMaisVelho != NULL) ? cpfHomemMaisVelho : "Nenhum homem encontrado.";
+}
+
+int main() {
+    Node *raiz = NULL;
+
+    int opcao;
+    char nome[30], cpf[12];
+    char sexo;
+    int idade;
+
+    do {
+        printf("\nMenu:\n");
+        printf("1. Cadastrar Pessoa\n");
+        printf("2. Contar Homens\n");
+        printf("3. Contar Tios\n");
+        printf("4. Informar Avos\n");
+        printf("5. Imprimir Com Mais de Duas Primas\n");
+        printf("6. Encontrar CPF do Homem Mais Velho\n");
+        printf("0. Sair\n");
+        printf("Escolha uma opcao: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                printf("Digite o nome: ");
+                scanf("%s", nome);
+                printf("Digite o CPF: ");
+                scanf("%s", cpf);
+                printf("Digite o sexo (M/F): ");
+                scanf(" %c", &sexo);
+                printf("Digite a idade: ");
+                scanf("%d", &idade);
+
+                // Chama a função cadastrarPessoa
+                if (raiz == NULL) {
+                    raiz = cadastrarPessoa(nome, cpf, sexo, idade);
+                } else {
+                    for (int i = 0; i < 10; i++) {
+                        if (raiz->filhos[i] == NULL) {
+                            raiz->filhos[i] = cadastrarPessoa(nome, cpf, sexo, idade);
+                            break;
+                        }
+                    }
+            }
+
+                printf("Pessoa cadastrada com sucesso!\n");
+                break;
+
+            case 2:
+                // Chama a função contarHomens
+                printf("Total de homens: %d\n", contarHomens(raiz));
+                break;
+
+            case 3:
+                // Chama a função contarTios
+                printf("Digite o nome para contar tios: ");
+                scanf("%s", nome);
+                contaTioHomemETiaMulher(raiz, nome);
+                break;
+
+            case 4:
+                // Chama a função informaAvos
+                printf("Digite o CPF para informar avos: ");
+                scanf("%s", cpf);
+                informaAvos(raiz, cpf);
+                break;
+
+            case 5:
+                // Chama a função imprimirComMaisDeDuasPrimas
+                imprimirComMaisDeDuasPrimas(raiz);
+                break;
+
+            case 6:
+                // Chama a função encontrarCpfHomemMaisVelho
+                printf("CPF do Homem Mais Velho: %s\n", encontrarCpfHomemMaisVelho(raiz));
+                break;
+
+            case 0:
+                printf("Saindo do programa.\n");
+                break;
+
+            default:
+                printf("Opcao invalida. Tente novamente.\n");
+        }
+    } while (opcao != 0);
+
+    return 0;
+}
