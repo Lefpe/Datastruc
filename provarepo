@@ -1,0 +1,139 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct fila;
+
+typedef struct Transporte {
+  char data[20];  // Alterei para uma string para armazenar a data.
+  float pesototal;
+  char destino[20];  // Alterei para uma string para armazenar o destino.
+  float valorfrete;
+  struct fila *prox;
+} transporte;
+
+typedef struct fila {
+  struct Transporte *info;
+  struct fila *prox;
+} fila;
+
+void inserir_produto(transporte *transportar, char data[], char destino[],
+                     float valorfrete, float peso) {
+  printf("Digite a data de transporte (ex: dia/mês/ano): ");
+  scanf("%s", data);
+  printf("Digite o peso do produto (em kg): ");
+  scanf("%f", &peso);
+  printf("Digite o destino do produto: ");
+  scanf("%s", destino);
+  printf("Digite o valor do frete: ");
+  scanf("%f", &valorfrete);
+
+  fila *aux;
+  aux = (fila *)malloc(sizeof(fila));
+  aux->info = (transporte *)malloc(sizeof(transporte));
+  strcpy(aux->info->data, data);
+  aux->info->pesototal = peso;
+  strcpy(aux->info->destino, destino);
+  aux->info->valorfrete = valorfrete;
+  aux->prox = NULL;
+
+  if (transportar->prox == NULL) {
+    transportar->prox = aux;
+  } else {
+    fila *aux2 = transportar->prox;
+    while (aux2->prox != NULL) {
+      aux2 = aux2->prox;
+    }
+    aux2->prox = aux;
+  }
+}
+
+void transportar_produto(fila *fila, char destino[]) {
+  float pesototal = 0;
+  fila *atual = fila->prox;
+
+  while (atual != NULL && pesototal <= 1001) {
+    pesototal = pesototal + atual->info->pesototal;
+    atual = atual->prox;
+  }
+
+  if (pesototal > 1001) {
+    printf("A carga excedeu o limite e será remanejada.\n");
+  } else {
+    atual = fila->prox;
+    while (atual != NULL) {
+      if (strcmp(atual->info->destino, destino) == 0) {
+        atual->info->pesototal = pesototal;
+        atual->info->valorfrete = atual->info->valorfrete;  // Não está claro de onde vem o valorfrete.
+      }
+      atual = atual->prox;
+    }
+  }
+}
+
+void calcular_peso(fila *fila) {
+  float peso = 0, pesototal = 0;
+
+  while (fila != NULL) {
+    peso = peso + fila->info->pesototal;
+    pesototal = pesototal + fila->info->pesototal;
+    fila = fila->prox;
+  }
+
+  printf("O peso total é: %.2f\n", pesototal);
+}
+
+void imprimir_transporte(fila *aux) {
+  while (aux != NULL) {
+    printf("Data: %s\n", aux->info->data);
+    printf("Destino: %s\n", aux->info->destino);
+    printf("Peso: %.2f\n", aux->info->pesototal);
+    printf("Valor do frete: %.2f\n", aux->info->valorfrete);
+    aux = aux->prox;
+  }
+  printf("\n");
+}
+
+int main(void) {
+  fila *fila;
+  fila = (fila *)malloc(sizeof(fila));
+  fila->prox = NULL;
+
+  int opcao;
+  char data[20], destino[20];
+  float peso, valorfrete;
+
+  do {
+    printf("Escolha uma das opções a seguir:\n");
+    printf("1) Inserir produto\n");
+    printf("2) Transportar produto\n");
+    printf("3) Calcular peso total\n");
+    printf("4) Mostrar fila\n");
+    printf("0) Sair\n");
+    scanf("%d", &opcao);
+
+    switch (opcao) {
+      case 1:
+        inserir_produto(fila, data, destino, valorfrete, peso);
+        break;
+      case 2:
+        printf("Digite o destino para transportar: ");
+        scanf("%s", destino);
+        transportar_produto(fila, destino);
+        break;
+      case 3:
+        calcular_peso(fila);
+        break;
+      case 4:
+        imprimir_transporte(fila->prox);
+        break;
+      default:
+        if (opcao != 0) {
+          printf("Opção inválida!\n");
+        }
+        break;
+    }
+  } while (opcao != 0);
+
+  return 0;
+}
