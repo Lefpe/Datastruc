@@ -145,7 +145,7 @@ int main() {
         scanf("%s", data);
         printf("Digite o peso do produto (em kg): ");
         scanf("%f", &peso);
-        printf("Digite o destino do produto: ");
+        printf("verificar produto: ");
         scanf("%s", destino);
         enfileirar(&fila, data, peso, destino);
         break;
